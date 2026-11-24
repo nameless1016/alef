@@ -1,2 +1,3 @@
 data/workspace.json
 __pycache__/
+.venv/

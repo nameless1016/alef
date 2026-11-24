@@ -9,7 +9,7 @@ from utils import icons
 
 ROOT = Path(__file__).resolve().parent.parent
 CSS_PATH = ROOT / "assets" / "styles.css"
-LOGO_PATH = ROOT / "assets" / "logo.png"
+LOGO_PATH = ROOT / "assets" / "new-logo.png"
 
 
 def esc(text) -> str:
