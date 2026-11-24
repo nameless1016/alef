@@ -34,9 +34,10 @@ def send_chip(chat_id: str, text: str) -> None:
 
 
 def discuss_note() -> None:
+    """Open a chat and send the note as *your* message (Alef never speaks first)."""
     ws = get_ws()
-    chat = ws.get_chat("scope") or (ws.chats[0] if ws.chats else ws.new_chat("Scope review"))
-    ws.add_message(chat.id, "alef", f"Picking up my note from Today: {ws.note}")
+    chat = ws.chats[0] if ws.chats else ws.new_chat("Scope review")
+    chat_service.send_message(ws, get_assistant_instance(), chat.id, f"Let's discuss: {ws.note}")
     navigate(f"chat:{chat.id}")
 
 
@@ -99,3 +100,7 @@ def cycle_accent() -> None:
     ws.project.accent = names[(names.index(ws.project.accent) + 1) % len(names)]
     ws._touch()
     st.toast(f"Accent: {ws.project.accent}")
+
+
+def toggle_group(key: str) -> None:
+    st.session_state["collapsed"].symmetric_difference_update({key})

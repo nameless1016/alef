@@ -15,6 +15,7 @@ from .models import (COLUMN_LABELS, PRIORITIES, Change, Chat, Document, Message,
                      Project, Task)
 
 PRIORITY_RANK = {p: i for i, p in enumerate(PRIORITIES)}
+SCHEMA = 2   # bump when the saved format changes; older saves are ignored
 
 
 class Workspace:
@@ -140,7 +141,7 @@ class Workspace:
     def new_document(self, kind: str, title: str) -> Document:
         title = title.strip() or ("Untitled map" if kind == "map" else "Untitled document")
         if kind == "map":
-            body = f"# {title}\n## Branch\n### Leaf"
+            body = f"# {title}"
             sub = "Explore the structure directly from its Markdown hierarchy."
         else:
             body = f"# {title}\n\nStart writing here."
@@ -215,6 +216,9 @@ class Workspace:
     def scope_health(self) -> dict:
         blocked = self.tasks_in("blocked")
         load = self.project.scope_load
+        if not self.tasks and load == 0:
+            return {"label": "Nothing tracked", "tone": "idle",
+                    "text": "Add tasks and set a scope load to see how healthy the slice is."}
         if load >= 85:
             return {"label": "At risk", "tone": "risk",
                     "text": "Scope load is past what the slice can carry. Cut before adding anything."}
@@ -288,6 +292,7 @@ class Workspace:
     # --------------------------------------------------------- persistence
     def to_dict(self) -> dict:
         return {
+            "schema": SCHEMA,
             "project": asdict(self.project),
             "tasks": [asdict(t) for t in self.tasks],
             "chats": [asdict(c) for c in self.chats],

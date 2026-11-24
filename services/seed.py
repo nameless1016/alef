@@ -65,7 +65,7 @@ def _iso(offset_days: int) -> str:
     return (date.today() + timedelta(days=offset_days)).isoformat()
 
 
-def default_workspace() -> Workspace:
+def demo_workspace() -> Workspace:
     now = time.time()
     project = Project(
         name="Glasshouse Protocol", tagline="Narrative stealth puzzle",
@@ -118,3 +118,13 @@ def default_workspace() -> Workspace:
                "Surveillance feedback nodes were added to Alef's working context.", now - 86400, True),
     ]
     return Workspace(project, tasks, chats, docs, changes, NOTE, last_sync=now - 12 * 60)
+
+
+def default_workspace() -> Workspace:
+    """A clean slate: only the project identity, no tasks, chats, files or changes."""
+    project = Project(
+        name="Glasshouse Protocol", tagline="Narrative stealth puzzle", engine="Godot 4.3",
+        user_name="Mamdani", branch="scope/vertical-slice",
+        scope_load=0, budget_used=0, baseline=0,
+    )
+    return Workspace(project, last_sync=time.time())

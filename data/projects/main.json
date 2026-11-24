@@ -1,0 +1,74 @@
+{
+  "schema": 2,
+  "project": {
+    "name": "Glasshouse Protocol",
+    "tagline": "Narrative stealth puzzle",
+    "description": "",
+    "goal": "",
+    "engine": "Godot 4.3",
+    "user_name": "Mamdani",
+    "branch": "scope/vertical-slice",
+    "target": "",
+    "milestone_title": "",
+    "milestone_date": "",
+    "scope_load": 0,
+    "budget_used": 0,
+    "baseline": 0,
+    "accent": "Coral",
+    "include_docs": true,
+    "include_maps": true,
+    "status": "Project active",
+    "version": "Alef 0.8",
+    "format": "Markdown"
+  },
+  "tasks": [
+    {
+      "title": "Test",
+      "column": "progress",
+      "priority": "medium",
+      "estimate": "1h",
+      "due": null,
+      "tags": [],
+      "description": "",
+      "id": "adc03f",
+      "created_at": 1795505745.4457889
+    }
+  ],
+  "chats": [
+    {
+      "title": "New chat 1",
+      "subtitle": "Planning \u00b7 Glasshouse Protocol",
+      "messages": [],
+      "id": "c5e0ca"
+    }
+  ],
+  "documents": [
+    {
+      "title": "test",
+      "kind": "map",
+      "subtitle": "Explore the structure directly from its Markdown hierarchy.",
+      "markdown": "# test\n## test\n# hello",
+      "id": "a13099"
+    }
+  ],
+  "changes": [
+    {
+      "kind": "map:a13099",
+      "title": "test updated",
+      "text": "Content changed since the last context sync.",
+      "ts": 1795506431.8131807,
+      "synced": false,
+      "id": "20c667"
+    },
+    {
+      "kind": "tasks",
+      "title": "Tasks changed",
+      "text": "Current priorities or completion state moved since the last context sync.",
+      "ts": 1795505761.0724287,
+      "synced": false,
+      "id": "6fa3bc"
+    }
+  ],
+  "note": "",
+  "last_sync": 1795505684.2285676
+}

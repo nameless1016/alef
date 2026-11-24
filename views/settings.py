@@ -56,7 +56,10 @@ def render() -> None:
             st.toast("Settings saved")
             st.rerun()
 
-        html('<div class="a-eyebrow a-section">DEMO DATA</div>')
-        with st.popover("Reset demo data"):
-            st.write("This replaces every task, chat and document with the starting demo content.")
-            st.button("Yes, reset everything", on_click=reset_workspace, type="primary")
+        html('<div class="a-eyebrow a-section">DATA</div>')
+        with st.popover("Clear all data"):
+            st.write("This removes every task, chat, document and change.")
+            st.button("Yes, clear everything", on_click=reset_workspace, type="primary", key="clear_all")
+        with st.popover("Load demo data"):
+            st.write("This replaces everything with the Glasshouse Protocol demo content.")
+            st.button("Yes, load the demo", on_click=reset_workspace, args=(True,), type="primary", key="load_demo")

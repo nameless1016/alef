@@ -1,11 +1,11 @@
 """Left navigation rail, built entirely from the workspace."""
 import streamlit as st
 
-from components.dialogs import new_item_dialog
+from components.dialogs import new_item_dialog, project_dialog
 from services.formatting import initials
 from utils import icons
-from utils.actions import create_chat, cycle_accent, navigate
-from utils.state import get_page, get_ws
+from utils.actions import create_chat, cycle_accent, navigate, toggle_group
+from utils.state import get_lib, get_page, get_ws
 from utils.ui import esc, html
 
 GROUP_ICONS = {"chat": ":material/chat_bubble_outline:", "doc": ":material/description:",
@@ -22,62 +22,78 @@ def _nav_button(page: str, label: str, icon: str) -> None:
               on_click=navigate, args=(page,), use_container_width=True)
 
 
-def _group_header(key: str, label: str) -> bool:
-    """Header row with a working '+' button. Returns True when '+' was pressed."""
+def _group_header(key: str, label: str, collapsed: bool) -> bool:
+    """Collapsible header row with a working '+'. Returns True when '+' was pressed."""
+    chev = icons.chevron_right(12) if collapsed else icons.chevron_down(12)
     with st.container(key=f"ghead_{key}"):
         html(f"""
         <div class="a-group">
-          <span class="a-group-chev">{icons.chevron_down(12)}</span>
+          <span class="a-group-chev">{chev}</span>
           <span class="a-group-icon">{icons.folder(14)}</span>
           <span class="a-group-label">{label}</span>
         </div>
         """)
-        return st.button("New", key=f"add_{key}", icon=":material/add:", help=f"New {label.lower()}")
+        st.button(f"Toggle {label}", key=f"gtoggle_{key}", on_click=toggle_group, args=(key,))
+        return st.button("New", key=f"add_{key}", icon=":material/add:")
+
+
+def _project_card() -> None:
+    p = get_ws().project
+    with st.container(key="card_project"):
+        html(f"""
+        <div class="a-project-card">
+          <span class="a-project-badge">{esc(initials(p.name))}</span>
+          <span class="a-project-text">
+            <b>{esc(p.name)}</b>
+            <small>{esc(p.engine)}{' · ' + esc(p.tagline) if p.tagline else ''}</small>
+          </span>
+          <span class="a-project-chev">{icons.chevron_right(13)}</span>
+        </div>
+        """)
+        if st.button("Switch project", key="ovl_project"):
+            project_dialog()
 
 
 def render_sidebar() -> None:
     ws = get_ws()
     p = ws.project
+    collapsed = st.session_state["collapsed"]
     groups = [
         ("chat", "Chat", [(f"chat:{c.id}", c.title) for c in ws.chats]),
         ("doc", "Document", [(d.page, d.title) for d in ws.docs("doc")]),
         ("map", "Map", [(d.page, d.title) for d in ws.docs("map")]),
     ]
     with st.sidebar:
-        html(f"""
-        <div class="a-project-card">
-          <span class="a-project-badge">{esc(initials(p.name))}</span>
-          <span class="a-project-text">
-            <b>{esc(p.name)}</b>
-            <small>{esc(p.engine)} · {esc(p.tagline)}</small>
-          </span>
-          <span class="a-project-chev">{icons.chevron_right(13)}</span>
-        </div>
-        """)
+        _project_card()
         _nav_button("today", "Today", ":material/auto_awesome:")
 
         for key, label, items in groups:
-            if _group_header(key, label):
+            is_collapsed = key in collapsed
+            if _group_header(key, label, is_collapsed):
                 if key == "chat":
                     create_chat()
+                    collapsed.discard("chat")
                     st.rerun()
                 else:
+                    collapsed.discard(key)
                     new_item_dialog(key)
-            with st.container(key=f"group_{key}"):
-                for page, name in items:
-                    _nav_button(page, name, GROUP_ICONS[key])
+            if not is_collapsed:
+                with st.container(key=f"group_{key}"):
+                    for page, name in items:
+                        _nav_button(page, name, GROUP_ICONS[key])
 
         _nav_button("tasks", "Tasks", ":material/check:")
         _nav_button("changes", "Changes", ":material/history:")
 
         with st.container(key="side_bottom"):
-            html(f"""
-            <div class="a-scope-card">
-              <div class="a-scope-row"><span>Scope load</span><b>{p.scope_load}%</b></div>
-              <div class="a-bar"><i style="width:{p.scope_load}%"></i></div>
-              <p>{esc(ws.scope_watch())}</p>
-            </div>
-            """)
+            if ws.tasks or p.scope_load:
+                html(f"""
+                <div class="a-scope-card">
+                  <div class="a-scope-row"><span>Scope load</span><b>{p.scope_load}%</b></div>
+                  <div class="a-bar"><i style="width:{p.scope_load}%"></i></div>
+                  <p>{esc(ws.scope_watch())}</p>
+                </div>
+                """)
             st.button("Theme", key="side_theme", icon=":material/palette:",
-                      on_click=cycle_accent, help="Cycle accent colour", use_container_width=True)
+                      on_click=cycle_accent, use_container_width=True)
             _nav_button("settings", "Settings", ":material/settings:")

@@ -5,6 +5,7 @@ from pathlib import Path
 import streamlit as st
 
 from services.models import ACCENTS
+from utils import icons
 
 ROOT = Path(__file__).resolve().parent.parent
 CSS_PATH = ROOT / "assets" / "styles.css"
@@ -39,4 +40,4 @@ def inject_css(content_width: int, badges: dict, accent: str = "Coral",
         shown = "" if not count else str(count)
         dynamic.append(f'.st-key-nav_{key} button::after{{content:"{shown}";'
                        f'{"display:none;" if not count else ""}}}')
-    st.markdown(f"<style>{css}\n{' '.join(dynamic)}</style>", unsafe_allow_html=True)
+    st.markdown(f"<style>{css}\n{icons.css()}\n{' '.join(dynamic)}</style>", unsafe_allow_html=True)

@@ -8,12 +8,12 @@ from utils.state import get_ws
 def render() -> None:
     ws = get_ws()
     m = ws.milestone()
-    days = f" / {m['days_left']} DAYS LEFT" if m["days_left"] is not None else ""
-    if page_header(f"SPRINT 03{days}", "Task board",
+    eyebrow = f"SPRINT 03 / {m['days_left']} DAYS LEFT" if m["days_left"] is not None else "TASKS"
+    if page_header(eyebrow, "Task board",
                    "Every active project keeps at least one current task.",
                    primary=dict(label="New task", key="new_task", tone="solid", icon=":material/add:")):
         task_dialog("")
     render_board(ws)
-    if not ws.tasks_in("current"):
+    if ws.tasks and not ws.tasks_in("current"):
         import streamlit as st
         st.caption("Heads up: nothing is in Current. Move one task there to keep the project moving.")

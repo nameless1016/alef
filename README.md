@@ -3,10 +3,11 @@
     pip install -r requirements.txt
     streamlit run app.py
 
-Everything is functional without an AI. State lives in `data/workspace.json`
-(created on first change; use Settings > Reset demo data to start over).
+Everything is functional without an AI. Each project is saved in `data/projects/<id>.json` (index in `data/library.json`)
+(created on first change; starts empty; Settings > Load demo data fills it with sample content).
 
 ## Architecture
+- `services/library.py`: several projects, one active; the project card in the sidebar switches/creates/deletes them.
 - `services/workspace.py`: the single store (tasks, chats, docs, changes) + derived stats. Pure Python.
 - `services/assistant.py`: **the AI seam.** `LocalAssistant` is a command router today;
   implement `Assistant.reply()` using `ws.context_snapshot()` and return it from `get_assistant()`.

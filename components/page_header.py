@@ -12,10 +12,10 @@ def page_header(eyebrow: str, title: str, subtitle: str,
                 menu: Optional[Callable[[], None]] = None) -> bool:
     """Returns True when the primary button was pressed (for dialog-opening actions)."""
     spec = [5]
+    if menu:
+        spec.append(0.4)
     if primary:
         spec.append(1.7)
-    if menu:
-        spec.append(0.45)
     cols = st.columns(spec, vertical_alignment="top")
     with cols[0]:
         html(f"""
@@ -26,12 +26,12 @@ def page_header(eyebrow: str, title: str, subtitle: str,
         </div>
         """)
     clicked, i = False, 1
-    if primary:
-        with cols[i]:
-            clicked = action_button(**primary)
-        i += 1
     if menu:
         with cols[i]:
             menu()
+        i += 1
+    if primary:
+        with cols[i]:
+            clicked = action_button(**primary)
     html('<div class="a-rule"></div>')
     return clicked

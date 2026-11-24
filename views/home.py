@@ -23,7 +23,7 @@ def render() -> None:
         <div class="a-hero">
           <div class="a-eyebrow">{esc(fmt_long_date(now.date()).upper())}</div>
           <h1>{greeting(now.hour)}, {esc(p.user_name)}.</h1>
-          <p>{esc(p.goal)}</p>
+          <p>{esc(p.goal or ('Add your first task to get started.' if not ws.tasks else ''))}</p>
         </div>
         """)
     with right:

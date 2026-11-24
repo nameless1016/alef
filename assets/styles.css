@@ -19,7 +19,7 @@ footer,[data-testid="stStatusWidget"],[data-testid="stSidebarCollapseButton"],
 .stApp{background:var(--bg);color:var(--text);font-family:var(--sans)}
 .stApp, .stApp button, .stApp textarea, .stApp input{font-family:var(--sans)}
 [data-testid="stMainBlockContainer"],.block-container{
-  max-width:var(--content-w) !important;margin:0 auto;
+  max-width:calc(var(--content-w) + 48px) !important;margin:0 auto;
   padding:calc(var(--top-h) + 44px) 24px calc(var(--status-h) + 48px) !important}
 [data-testid="stMainBlockContainer"] > [data-testid="stVerticalBlock"]{gap:0}
 [data-testid="stElementContainer"]{margin:0}
@@ -55,9 +55,10 @@ section[data-testid="stSidebar"] [data-testid="stVerticalBlock"]{gap:0 !importan
 section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] > div > [data-testid="stVerticalBlock"],
 section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] > [data-testid="stVerticalBlock"]{
   min-height:calc(100vh - var(--top-h) - var(--status-h) - 8px)}
-.st-key-side_bottom{margin-top:auto !important;border-top:0}
 
-.a-project-card{display:flex;align-items:center;gap:11px;margin:1px 9px 10px;padding:10px 12px;
+
+.st-key-card_project{margin:1px 9px 10px}
+.a-project-card{display:flex;align-items:center;gap:11px;margin:0;padding:10px 12px;
   background:var(--s2);border:1px solid var(--line2)}
 .a-project-badge{flex:none;width:28px;height:28px;display:flex;align-items:center;justify-content:center;
   border:1px solid var(--coral);color:var(--coral);font:500 9.5px var(--mono);background:var(--accent-soft)}
@@ -72,19 +73,19 @@ section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] > [data-te
 .a-group-plus{margin-left:auto;color:var(--muted);font:400 14px var(--mono)}
 
 section[data-testid="stSidebar"] .stButton{width:100%}
-section[data-testid="stSidebar"] .stButton > button{
+section[data-testid="stSidebar"] .stButton button{
   width:100%;justify-content:flex-start;gap:10px;height:26px;min-height:26px;padding:0 12px 0 14px;
   background:transparent;border:0;border-left:2px solid transparent;border-radius:0;box-shadow:none;
   color:var(--muted);font-size:12px;font-weight:400;position:relative}
-section[data-testid="stSidebar"] .stButton > button p{font-size:12px;margin:0;color:inherit}
-section[data-testid="stSidebar"] .stButton > button [data-testid="stIconMaterial"]{font-size:15px;color:var(--muted)}
-section[data-testid="stSidebar"] .stButton > button:hover{background:#15131a;color:var(--text)}
-section[data-testid="stSidebar"] .stButton > button[data-testid="stBaseButton-primary"]{
+section[data-testid="stSidebar"] .stButton button p{font-size:12px;margin:0;color:inherit}
+section[data-testid="stSidebar"] .stButton button [data-testid="stIconMaterial"]{font-size:15px;color:var(--muted)}
+section[data-testid="stSidebar"] .stButton button:hover{background:#15131a;color:var(--text)}
+section[data-testid="stSidebar"] .stButton button[data-testid="stBaseButton-primary"]{
   background:var(--s4);color:var(--text);border-left-color:var(--coral)}
-section[data-testid="stSidebar"] .stButton > button[data-testid="stBaseButton-primary"] [data-testid="stIconMaterial"]{color:var(--coral)}
-section[data-testid="stSidebar"] .stButton > button:focus-visible{outline:1px solid var(--coral);outline-offset:-1px}
-section[data-testid="stSidebar"] .stButton > button > div{display:flex;gap:10px;align-items:center;justify-content:flex-start}
-.st-key-group_chat .stButton > button,.st-key-group_doc .stButton > button,.st-key-group_map .stButton > button{padding-left:30px}
+section[data-testid="stSidebar"] .stButton button[data-testid="stBaseButton-primary"] [data-testid="stIconMaterial"]{color:var(--coral)}
+section[data-testid="stSidebar"] .stButton button:focus-visible{outline:1px solid var(--coral);outline-offset:-1px}
+section[data-testid="stSidebar"] .stButton button > div{display:flex;gap:10px;align-items:center;justify-content:flex-start}
+.st-key-group_chat .stButton button,.st-key-group_doc .stButton button,.st-key-group_map .stButton button{padding-left:30px}
 /* count badges (content injected per render from Python) */
 .st-key-nav_tasks button::after,.st-key-nav_changes button::after{
   position:absolute;right:12px;top:50%;transform:translateY(-50%);min-width:16px;height:16px;padding:0 4px;
@@ -97,7 +98,7 @@ section[data-testid="stSidebar"] .stButton > button > div{display:flex;gap:10px;
 .a-bar{height:3px;background:#2a272e;margin:8px 0 9px}
 .a-bar i{display:block;height:100%;background:#c9a36a}
 .a-scope-card p{margin:0;font:400 10px/1.45 var(--sans);color:var(--dim)}
-.st-key-side_bottom .stButton > button{height:34px;min-height:34px}
+.st-key-side_bottom .stButton button{height:34px;min-height:34px}
 
 /* ---------- Shared type ---------- */
 .a-eyebrow{font:500 9.5px var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--coral-ink)}
@@ -115,10 +116,10 @@ section[data-testid="stSidebar"] .stButton > button > div{display:flex;gap:10px;
 
 /* ---------- Buttons in the main area ---------- */
 [data-testid="stMainBlockContainer"] .stButton{display:flex;justify-content:flex-end}
-[data-testid="stMainBlockContainer"] .stButton > button{
+[data-testid="stMainBlockContainer"] .stButton button{
   width:auto;border-radius:0;height:34px;min-height:34px;padding:0 14px;box-shadow:none;
   font:600 11px var(--mono);letter-spacing:.01em;gap:8px}
-[data-testid="stMainBlockContainer"] .stButton > button p{font:600 11px var(--mono);margin:0}
+[data-testid="stMainBlockContainer"] .stButton button p{font:600 11px var(--mono);margin:0}
 [class*="st-key-btn_outline"] button{background:var(--s3);border:1px solid #3b3742;color:var(--text)}
 [class*="st-key-btn_outline"] button:hover{border-color:var(--coral);color:#fff}
 [class*="st-key-btn_solid"] button{background:var(--coral);border:1px solid var(--coral);color:#fff3f4}
@@ -127,7 +128,7 @@ section[data-testid="stSidebar"] .stButton > button > div{display:flex;gap:10px;
 [class*="st-key-btn_link"] button p{font:400 11px var(--mono) !important;color:var(--muted)}
 [class*="st-key-btn_link"] button:hover p{color:var(--coral)}
 .st-key-btn_link_discuss button p{color:var(--coral) !important}
-[data-testid="stMainBlockContainer"] .stButton > button:focus-visible{outline:2px solid var(--coral);outline-offset:2px}
+[data-testid="stMainBlockContainer"] .stButton button:focus-visible{outline:2px solid var(--coral);outline-offset:2px}
 
 /* ---------- Today ---------- */
 .a-hero{padding:0 0 22px}
@@ -236,22 +237,22 @@ section[data-testid="stSidebar"] .stButton > button > div{display:flex;gap:10px;
 /* sidebar group header with a working "+" */
 [class*="st-key-ghead_"]{position:relative}
 [class*="st-key-add_"]{position:absolute !important;right:8px;top:50%;transform:translateY(-35%);width:auto !important;z-index:2}
-section[data-testid="stSidebar"] [class*="st-key-add_"] .stButton > button{
+section[data-testid="stSidebar"] [class*="st-key-add_"] .stButton button{
   width:22px;height:22px;min-height:22px;padding:0;justify-content:center;border-left:0}
-section[data-testid="stSidebar"] [class*="st-key-add_"] .stButton > button p{display:none}
-section[data-testid="stSidebar"] [class*="st-key-add_"] .stButton > button:hover{background:var(--s3);color:var(--coral)}
+section[data-testid="stSidebar"] [class*="st-key-add_"] .stButton button p{display:none}
+section[data-testid="stSidebar"] [class*="st-key-add_"] .stButton button:hover{background:var(--s3);color:var(--coral)}
 
 /* clickable cards: an invisible button covers the card */
 [class*="st-key-card_"]{position:relative}
 [class*="st-key-ovl_"]{position:absolute !important;inset:0;z-index:1;width:100% !important;height:100%}
 [data-testid="stMainBlockContainer"] [class*="st-key-ovl_"] .stButton{width:100%;height:100%}
-[data-testid="stMainBlockContainer"] [class*="st-key-ovl_"] .stButton > button{
+[data-testid="stMainBlockContainer"] [class*="st-key-ovl_"] .stButton button{
   width:100%;height:100%;min-height:0;padding:0 8px;background:transparent;border:1px solid transparent;
   border-radius:0;justify-content:flex-end;color:var(--dim)}
-[data-testid="stMainBlockContainer"] [class*="st-key-ovl_"] .stButton > button p{font-size:0;margin:0}
-[data-testid="stMainBlockContainer"] [class*="st-key-ovl_"] .stButton > button:hover{border-color:var(--line2);background:color-mix(in srgb,var(--coral) 4%,transparent)}
-[data-testid="stMainBlockContainer"] [class*="st-key-ovl_"] .stButton > button:hover [data-testid="stIconMaterial"]{color:var(--coral)}
-[class*="st-key-ovl_focus_"] .stButton > button [data-testid="stIconMaterial"]{display:none}
+[data-testid="stMainBlockContainer"] [class*="st-key-ovl_"] .stButton button p{font-size:0;margin:0}
+[data-testid="stMainBlockContainer"] [class*="st-key-ovl_"] .stButton button:hover{border-color:var(--line2);background:color-mix(in srgb,var(--coral) 4%,transparent)}
+[data-testid="stMainBlockContainer"] [class*="st-key-ovl_"] .stButton button:hover [data-testid="stIconMaterial"]{color:var(--coral)}
+[class*="st-key-ovl_focus_"] .stButton button [data-testid="stIconMaterial"]{display:none}
 
 /* task board */
 .st-key-board [data-testid="stHorizontalBlock"]{gap:9.5px;align-items:flex-start}
@@ -270,12 +271,12 @@ section[data-testid="stSidebar"] [class*="st-key-add_"] .stButton > button:hover
 .a-task.is-done .a-task-main b{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--dim)}
 [class*="st-key-tskchk_"]{position:absolute !important;left:9px;top:50%;transform:translateY(-50%);z-index:3;width:auto !important}
 [data-testid="stMainBlockContainer"] [class*="st-key-tskchk_"] .stButton{width:auto}
-[data-testid="stMainBlockContainer"] [class*="st-key-tskchk_"] .stButton > button{
+[data-testid="stMainBlockContainer"] [class*="st-key-tskchk_"] .stButton button{
   width:22px;height:22px;min-height:22px;padding:0;background:transparent;border:0;justify-content:center;color:var(--dim)}
-[data-testid="stMainBlockContainer"] [class*="st-key-tskchk_"] .stButton > button p{font-size:0;margin:0}
-[data-testid="stMainBlockContainer"] [class*="st-key-tskchk_"] .stButton > button [data-testid="stIconMaterial"]{font-size:17px}
-[data-testid="stMainBlockContainer"] [class*="st-key-tskchk_"] .stButton > button:hover{color:var(--coral)}
-[data-testid="stMainBlockContainer"] [class*="st-key-tskchk_done_"] .stButton > button{color:var(--green)}
+[data-testid="stMainBlockContainer"] [class*="st-key-tskchk_"] .stButton button p{font-size:0;margin:0}
+[data-testid="stMainBlockContainer"] [class*="st-key-tskchk_"] .stButton button [data-testid="stIconMaterial"]{font-size:17px}
+[data-testid="stMainBlockContainer"] [class*="st-key-tskchk_"] .stButton button:hover{color:var(--coral)}
+[data-testid="stMainBlockContainer"] [class*="st-key-tskchk_done_"] .stButton button{color:var(--green)}
 
 /* focus rows */
 .st-key-focus_list{margin-top:14px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
@@ -291,12 +292,6 @@ section[data-testid="stSidebar"] [class*="st-key-add_"] .stButton > button:hover
 .st-key-chat_head .a-chat-head b{font:600 13px var(--sans)}
 .st-key-chat_head .a-chat-head small{font:400 9.5px var(--sans);color:var(--dim)}
 .st-key-chat_head [data-testid="stHorizontalBlock"]{gap:0}
-[class*="st-key-menu_"] .stButton,[class*="st-key-menu_"]{display:flex;justify-content:flex-end}
-[class*="st-key-menu_"] button[data-testid="stPopoverButton"],[class*="st-key-menu_"] [data-testid="stPopover"] > button{
-  min-height:30px;height:30px;width:34px;padding:0;background:transparent;border:1px solid transparent;border-radius:0;color:var(--muted);justify-content:center}
-[class*="st-key-menu_"] [data-testid="stPopover"] > button:hover{border-color:var(--line2);color:var(--coral)}
-[class*="st-key-menu_"] [data-testid="stPopover"] > button p{font-size:0;margin:0}
-[class*="st-key-menu_"] [data-testid="stPopover"] > button svg:last-child{display:none}
 .a-chat-body{padding-bottom:230px}
 .st-key-composer{position:fixed;left:var(--side-w);right:0;bottom:var(--status-h);z-index:100;
   padding:10px 12px 12px;background:var(--bg);border-top:1px solid var(--line)}
@@ -347,3 +342,72 @@ section[data-testid="stSidebar"] [class*="st-key-add_"] .stButton > button:hover
 .st-key-settings_form{max-width:560px}
 .st-key-settings_form [data-testid="stForm"]{border:0;padding:0}
 .st-key-settings_form .stButton{justify-content:flex-start}
+
+/* ---- v3 fixes ---- */
+.a-avatar-alef{display:inline-flex;align-items:center;justify-content:center;color:var(--coral)}
+.a-md-hint{padding:8px 14px;border-top:1px solid var(--line);font:400 9.5px var(--mono);color:var(--dim)}
+
+/* map markdown editor: style via the widget's own key class (always wraps the textarea) */
+[class*="st-key-map_md_"] [data-testid="stTextArea"] div,
+[class*="st-key-map_md_"] div[data-baseweb],
+[class*="st-key-doc_text_"] div[data-baseweb]{background:transparent !important;border:0 !important;border-radius:0 !important;box-shadow:none !important}
+[class*="st-key-map_md_"] textarea{background:transparent !important;border:0 !important;border-radius:0 !important;
+  padding:11px 14px !important;font:400 11px/17.2px var(--mono) !important;color:var(--text) !important;letter-spacing:0}
+[class*="st-key-doc_text_"] textarea{background:var(--s1) !important;border:1px solid var(--line) !important;border-radius:0 !important;
+  font:400 12px/1.6 var(--mono) !important;color:var(--text) !important}
+[class*="st-key-map_md_"]{margin:0 !important}
+
+/* chat box: key class on the widget is the reliable hook */
+[class*="st-key-chat_input_"] [data-testid="stChatInput"],[class*="st-key-chat_input_"] > div{border-radius:0 !important}
+[class*="st-key-chat_input_"] [data-testid="stChatInput"]{background:var(--s2) !important;border:1px solid var(--line2) !important;box-shadow:none !important}
+[class*="st-key-chat_input_"] [data-testid="stChatInput"] div{background:transparent !important;border-radius:0 !important;border-color:transparent !important}
+[class*="st-key-chat_input_"] textarea{font:400 12.5px var(--sans) !important;color:var(--text) !important}
+[class*="st-key-chat_input_"] button{background:var(--coral) !important;border-radius:0 !important;color:#fff !important}
+
+/* =====================================================================
+   v4: alignment, sidebar structure, icons, options button
+   ===================================================================== */
+.a-brand-mark,.a-group-chev,.a-group-icon,.a-note-icon,.a-avatar-alef,.a-project-chev{display:flex;align-items:center;justify-content:center}
+.a-brand-mark{color:var(--coral)}
+
+/* every styled button sits flush with the right edge of its column */
+[class*="st-key-btn_"],[class*="st-key-menu_"]{align-items:flex-end !important}
+[class*="st-key-btn_"] [data-testid="stElementContainer"],
+[class*="st-key-menu_"] [data-testid="stElementContainer"]{margin-left:auto}
+[class*="st-key-btn_"] .stButton,[class*="st-key-menu_"] .stButton{justify-content:flex-end}
+
+/* "···" options button: icon only */
+[data-testid="stMainBlockContainer"] [class*="st-key-menu_"] .stButton button{
+  width:34px;min-width:34px;height:32px;min-height:32px;padding:0;justify-content:center;gap:0;
+  background:transparent;border:1px solid transparent;color:var(--muted)}
+[data-testid="stMainBlockContainer"] [class*="st-key-menu_"] .stButton button p{display:none}
+[data-testid="stMainBlockContainer"] [class*="st-key-menu_"] .stButton button:hover{border-color:var(--line2);color:var(--coral)}
+
+/* sidebar: clickable project card */
+section[data-testid="stSidebar"] [class*="st-key-ovl_"]{position:absolute !important;inset:0;z-index:2;width:100% !important;height:100%}
+section[data-testid="stSidebar"] [class*="st-key-ovl_"] .stButton{width:100%;height:100%}
+section[data-testid="stSidebar"] [class*="st-key-ovl_"] .stButton button{
+  width:100%;height:100%;min-height:0;padding:0;background:transparent;border:1px solid transparent;border-left-width:1px}
+section[data-testid="stSidebar"] [class*="st-key-ovl_"] .stButton button p{font-size:0;margin:0}
+.st-key-card_project:hover .a-project-card{border-color:var(--coral)}
+.a-project-chev{color:var(--muted)}
+
+/* sidebar: collapsible group headers */
+.a-group{cursor:pointer}
+[class*="st-key-gtoggle_"]{position:absolute !important;top:0;bottom:0;left:0;right:34px;z-index:1;width:auto !important}
+section[data-testid="stSidebar"] [class*="st-key-gtoggle_"] .stButton{width:100%;height:100%}
+section[data-testid="stSidebar"] [class*="st-key-gtoggle_"] .stButton button{
+  width:100%;height:100%;min-height:0;padding:0;background:transparent;border:0;border-left:0}
+section[data-testid="stSidebar"] [class*="st-key-gtoggle_"] .stButton button p{font-size:0;margin:0}
+[class*="st-key-ghead_"]:hover .a-group-chev,[class*="st-key-ghead_"]:hover .a-group-label{color:var(--coral)}
+
+/* sidebar: gap before Tasks, and the footer group pinned to the bottom */
+.st-key-nav_tasks{margin-top:12px}
+section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"]{padding-bottom:190px !important}
+.st-key-side_bottom{position:fixed !important;left:0;bottom:var(--status-h);width:var(--side-w);
+  background:var(--s0);z-index:5;padding-top:6px}
+.st-key-side_bottom > [data-testid="stVerticalBlock"]{gap:0}
+
+/* map editor: fixed size, hint wraps instead of being clipped */
+[class*="st-key-map_md_"] textarea{resize:none !important}
+.a-md-hint{white-space:normal;line-height:1.5}

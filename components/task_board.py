@@ -28,7 +28,7 @@ def task_card(task: Task) -> None:
         html(_card_html(task))
         st.button("Toggle complete", key=f"tskchk_{'done_' if task.done else ''}{task.id}",
                   icon=":material/check_box:" if task.done else ":material/check_box_outline_blank:",
-                  on_click=toggle_task, args=(task.id,), help="Mark complete / reopen")
+                  on_click=toggle_task, args=(task.id,))
         if st.button(f"Open {task.title}", key=f"ovl_task_{task.id}",
                      icon=":material/chevron_right:"):
             task_dialog(task.id)

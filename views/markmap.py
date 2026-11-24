@@ -30,10 +30,12 @@ def render(page: str) -> None:
             with left:
                 with st.container(key="md_editor"):
                     html(f'<div class="a-md-file">{icons.file(13)}{esc(doc.filename)}</div>')
-                    st.text_area("Markdown", value=doc.markdown, height=530, key=f"map_md_{doc.id}",
+                    st.text_area("Markdown", value=doc.markdown, height=460, key=f"map_md_{doc.id}",
                                  on_change=save_map_markdown, args=(doc.id,),
                                  label_visibility="collapsed",
                                  help="Edits update the map when you click outside the box.")
+                    html('<div class="a-md-hint"># root &nbsp;·&nbsp; ## branch &nbsp;·&nbsp; ### sub-branch '
+                         '&nbsp;·&nbsp; Ctrl+Enter to apply</div>')
             with right:
                 render_mindmap(doc.markdown)
         else:

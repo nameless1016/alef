@@ -78,5 +78,60 @@ def new_item_dialog(kind: str) -> None:
                          placeholder="Surveillance feedback" if kind == "map" else "Level notes")
     if st.button(f"Create {label}", type="primary", key=f"new_{kind}_go"):
         doc = get_ws().new_document(kind, name)
+        if kind == "map":
+            st.session_state["md_open"].add(doc.page)
         navigate(doc.page)
+        st.rerun()
+
+
+@st.dialog("Projects")
+def project_dialog() -> None:
+    from services.formatting import initials
+    from services.models import ENGINES
+    from utils.state import get_lib, switch_project
+
+    lib = get_lib()
+    st.caption("Switch between projects or start a new one.")
+    for pid, proj in lib.projects():
+        active = pid == lib.active_id
+        label = f"{proj.name}  ·  {proj.engine}" + ("   (current)" if active else "")
+        if st.button(label, key=f"proj_{pid}", icon=":material/folder_open:" if not active else ":material/check_circle:",
+                     type="primary" if active else "secondary", use_container_width=True):
+            if not active:
+                switch_project(pid)
+            st.rerun()
+
+    st.divider()
+    st.markdown("**New project**")
+    name = st.text_input("Project name", key="np_name", placeholder="e.g. Lantern Run")
+    tagline = st.text_input("Tagline", key="np_tag", placeholder="Optional")
+    engine = st.selectbox("Engine", ENGINES, key="np_engine")
+    if st.button("Create project", type="primary", key="np_go", disabled=not name.strip()):
+        lib.create(name, tagline, engine, user_name=get_ws().project.user_name)
+        from utils.state import _fresh_view
+        _fresh_view()
+        st.rerun()
+
+    if len(lib.projects()) > 1:
+        st.divider()
+        sure = st.checkbox("Delete the current project and all its data", key="np_del_sure")
+        if st.button("Delete current project", key="np_del", disabled=not sure):
+            lib.delete(lib.active_id)
+            from utils.state import _fresh_view
+            _fresh_view()
+            st.rerun()
+
+
+@st.dialog("Options")
+def entity_dialog(kind: str, entity_id: str, title: str) -> None:
+    from utils.actions import delete_entity, rename_entity
+
+    st.text_input("Name", value=title, key=f"rename_{entity_id}")
+    if st.button("Rename", key=f"rename_btn_{entity_id}"):
+        rename_entity(kind, entity_id)
+        st.rerun()
+    st.divider()
+    sure = st.checkbox("Yes, delete this", key=f"sure_{entity_id}")
+    if st.button("Delete", key=f"del_btn_{entity_id}", icon=":material/delete:", disabled=not sure):
+        delete_entity(kind, entity_id)
         st.rerun()

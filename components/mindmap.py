@@ -10,11 +10,12 @@ _TEMPLATE = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=JetBrains+Mono:wght@400&display=swap');
 html,body{margin:0;height:100%;background:#0f0e12;font-family:'DM Sans',system-ui,sans-serif;overflow:hidden}
-#frame{position:relative;box-sizing:border-box;height:100vh;border:1px solid #26232a;background:#0f0e12}
-#stage{position:absolute;inset:0;transform-origin:50% 50%;transition:transform .15s ease}
+#frame{cursor:grab;user-select:none;touch-action:none;overflow:hidden;position:relative;box-sizing:border-box;height:100vh;border:1px solid #26232a;background:#0f0e12}
+#stage{position:absolute;inset:0}
 svg{width:100%;height:100%;display:block}
 .edge{fill:none;stroke-width:1.6}
 .node{cursor:pointer}
+#frame.grabbing{cursor:grabbing}
 .node text{fill:#e9e6ec;font-size:11px;font-family:'DM Sans',system-ui,sans-serif}
 .node .ul{stroke-width:1.2}
 .node circle{fill:#0f0e12;stroke-width:1.6}
@@ -29,26 +30,78 @@ svg{width:100%;height:100%;display:block}
 <div id="frame">
   <div id="zoom"><button id="out" aria-label="Zoom out">-</button><span id="pct">100%</span><button id="in" aria-label="Zoom in">+</button></div>
   <div id="stage">__SVG__</div>
-  <div id="hint">Select a node to collapse its branch</div>
+  <div id="hint">Drag to pan · scroll to zoom · select a node to collapse</div>
 </div>
 <script>
 const parent = __PARENTS__;
 const collapsed = new Set();
+const frame = document.getElementById('frame'), stage = document.getElementById('stage'), pct = document.getElementById('pct');
+const MIN = 0.3, MAX = 12;
+const VW = __VW__, VH = __VH__;
+const svg = stage.querySelector('svg');
+let view = { cx: VW / 2, cy: VH / 2, s: 1 };       // centre in SVG units, zoom relative to "fit"
+
 const hidden = id => { let p = parent[id]; while (p) { if (collapsed.has(p)) return true; p = parent[p]; } return false; };
 function refresh() {
   document.querySelectorAll('[data-id]').forEach(el => { el.style.display = hidden(el.dataset.id) ? 'none' : ''; });
   document.querySelectorAll('.node').forEach(g => g.classList.toggle('is-collapsed', collapsed.has(g.dataset.id)));
 }
-document.querySelectorAll('.node').forEach(g => g.addEventListener('click', () => {
-  const id = g.dataset.id;
-  if (!Object.values(parent).includes(id)) return;
-  collapsed.has(id) ? collapsed.delete(id) : collapsed.add(id);
-  refresh();
-}));
-let zoom = 100;
-const apply = () => { document.getElementById('stage').style.transform = 'scale(' + zoom / 100 + ')'; document.getElementById('pct').textContent = zoom + '%'; };
-document.getElementById('in').onclick = () => { zoom = Math.min(200, zoom + 10); apply(); };
-document.getElementById('out').onclick = () => { zoom = Math.max(40, zoom - 10); apply(); };
+function metrics() {                                   // pixels per SVG unit at the current zoom
+  const r = frame.getBoundingClientRect();
+  return { fw: r.width, fh: r.height, k: Math.min(r.width / VW, r.height / VH) * view.s };
+}
+function apply() {                                     // re-render the vectors via viewBox: never blurry
+  const { fw, fh, k } = metrics(), w = fw / k, h = fh / k;
+  svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+  svg.setAttribute('viewBox', (view.cx - w / 2) + ' ' + (view.cy - h / 2) + ' ' + w + ' ' + h);
+  pct.textContent = Math.round(view.s * 100) + '%';
+}
+function zoomAt(mx, my, factor) {                      // keep the point under (mx,my) fixed
+  const m = metrics(), s2 = Math.min(MAX, Math.max(MIN, view.s * factor));
+  const px = view.cx + (mx - m.fw / 2) / m.k, py = view.cy + (my - m.fh / 2) / m.k;
+  view.s = s2;
+  const k2 = metrics().k;
+  view.cx = px - (mx - m.fw / 2) / k2;
+  view.cy = py - (my - m.fh / 2) / k2;
+  apply();
+}
+function zoomCentre(f) { const r = frame.getBoundingClientRect(); zoomAt(r.width / 2, r.height / 2, f); }
+
+frame.addEventListener('wheel', e => {                 // scroll to zoom
+  e.preventDefault();
+  const r = frame.getBoundingClientRect();
+  zoomAt(e.clientX - r.left, e.clientY - r.top, Math.exp(-e.deltaY * 0.0015));
+}, { passive: false });
+
+let drag = null;                                       // drag to pan, click to collapse
+frame.addEventListener('pointerdown', e => {
+  if (e.target.closest('#zoom') || e.button !== 0) return;
+  drag = { x: e.clientX, y: e.clientY, moved: false };
+  frame.classList.add('grabbing');
+});
+window.addEventListener('pointermove', e => {
+  if (!drag) return;
+  const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+  if (!drag.moved && Math.hypot(dx, dy) < 4) return;
+  drag.moved = true; drag.x = e.clientX; drag.y = e.clientY;
+  const k = metrics().k; view.cx -= dx / k; view.cy -= dy / k; apply();
+});
+window.addEventListener('pointerup', e => {
+  if (!drag) return;
+  const wasClick = !drag.moved;
+  drag = null; frame.classList.remove('grabbing');
+  const node = wasClick && e.target.closest ? e.target.closest('.node') : null;
+  if (node && Object.values(parent).includes(node.dataset.id)) {
+    const id = node.dataset.id;
+    collapsed.has(id) ? collapsed.delete(id) : collapsed.add(id);
+    refresh();
+  }
+});
+frame.addEventListener('dblclick', () => { view = { cx: VW / 2, cy: VH / 2, s: 1 }; apply(); });
+document.getElementById('in').onclick = () => zoomCentre(1.2);
+document.getElementById('out').onclick = () => zoomCentre(1 / 1.2);
+window.addEventListener('resize', apply);
+apply();
 </script>
 """
 
@@ -92,5 +145,6 @@ def render_mindmap(markdown: str, height: int = 562) -> None:
         return
     parents = {n["id"]: n["parent"] for n in nodes}
     page = (_TEMPLATE.replace("__SVG__", _svg(nodes))
-                     .replace("__PARENTS__", json.dumps(parents)))
+                     .replace("__PARENTS__", json.dumps(parents))
+                     .replace("__VW__", str(VIEW_W)).replace("__VH__", str(VIEW_H)))
     components.html(page, height=height, scrolling=False)

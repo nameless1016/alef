@@ -23,12 +23,12 @@ def parse_markdown(md: str):
         node = {"id": f"n{counter}", "label": label, "children": []}
         counter += 1
         if root is None:
-            root, stack = node, [(level, node)]
+            root, stack, root_level = node, [(level, node)], level
             continue
         while stack and stack[-1][0] >= level:
             stack.pop()
         if not stack:
-            continue
+            stack = [(root_level, root)]   # another top-level heading: hang it off the root
         stack[-1][1]["children"].append(node)
         stack.append((level, node))
     return root
