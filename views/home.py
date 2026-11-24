@@ -1,61 +1,36 @@
-"""Today screen."""
+"""Today."""
+from datetime import datetime
+
 import streamlit as st
 
-from components.task_card import focus_row
-from services.data_service import (ALEF_NOTE, FOCUS_TASK_IDS, MILESTONE, PROJECT,
-                                   SCOPE_HEALTH, task_by_id)
+from components.buttons import action_button
+from components.stats import render_stats
+from components.task_board import focus_row
+from services.formatting import fmt_long_date, greeting
 from utils import icons
-from utils.state import navigate
-from utils.ui import html
+from utils.actions import discuss_note, navigate
+from utils.state import get_ws
+from utils.ui import esc, html
 
 
 def render() -> None:
-    left, right = st.columns([5, 1.25], vertical_alignment="bottom")
+    ws = get_ws()
+    p, now = ws.project, datetime.now()
+
+    left, right = st.columns([5, 1.3], vertical_alignment="bottom")
     with left:
         html(f"""
         <div class="a-hero">
-          <div class="a-eyebrow">{PROJECT['today_label'].upper()}</div>
-          <h1>Good morning, {PROJECT['user_name']}.</h1>
-          <p>{PROJECT['goal']}</p>
+          <div class="a-eyebrow">{esc(fmt_long_date(now.date()).upper())}</div>
+          <h1>{greeting(now.hour)}, {esc(p.user_name)}.</h1>
+          <p>{esc(p.goal)}</p>
         </div>
         """)
     with right:
-        with st.container(key="hdr_solid_open_board"):
-            st.button("Open task board", key="open_board", icon=":material/check:",
+        action_button("Open task board", "go_board", tone="solid", icon=":material/check:",
                       on_click=navigate, args=("tasks",))
 
-    m = MILESTONE
-    html(f"""
-    <div class="a-stats">
-      <div class="a-stat">
-        <div class="a-eyebrow">PROJECT PROGRESS</div>
-        <div class="a-progress">
-          <div class="a-progress-num"><b>{PROJECT['progress']}%</b><small>SLICE</small></div>
-          <div class="a-progress-text">
-            <h3>{PROJECT['name']}</h3>
-            <p>{PROJECT['description']}</p>
-            <span class="a-amber">Target · {PROJECT['target']}</span>
-          </div>
-        </div>
-      </div>
-      <div class="a-stat">
-        <div class="a-eyebrow">SCOPE HEALTH</div>
-        <div class="a-health"><span class="a-diamond">◆</span>{SCOPE_HEALTH['label']}</div>
-        <p class="a-muted">{SCOPE_HEALTH['text']}</p>
-        <div class="a-budget">
-          <div class="a-scope-row"><span>Budget used</span><b>{PROJECT['budget_used']}%</b></div>
-          <div class="a-bar"><i style="width:{PROJECT['budget_used']}%"></i></div>
-        </div>
-      </div>
-      <div class="a-stat">
-        <div class="a-eyebrow">NEXT MILESTONE</div>
-        <div class="a-month">{m['month'].upper()}</div>
-        <div class="a-day">{m['day']}</div>
-        <h3>{m['title']}</h3>
-        <p class="a-dim">{m['meta']}</p>
-      </div>
-    </div>
-    """)
+    render_stats(ws)
 
     head, link = st.columns([4, 1], vertical_alignment="bottom")
     with head:
@@ -66,21 +41,26 @@ def render() -> None:
         </div>
         """)
     with link:
-        with st.container(key="hdr_link_view_tasks"):
-            st.button("View all tasks →", key="view_tasks", on_click=navigate, args=("tasks",))
+        action_button("View all tasks →", "view_tasks", tone="link", on_click=navigate, args=("tasks",))
 
-    rows = "".join(focus_row(i + 1, task_by_id(tid)) for i, tid in enumerate(FOCUS_TASK_IDS))
-    html(f'<div class="a-focus-list">{rows}</div>')
+    focus = ws.focus_tasks(2)
+    with st.container(key="focus_list"):
+        if focus:
+            for i, task in enumerate(focus, start=1):
+                focus_row(i, task)
+        else:
+            html('<div class="a-empty-box">No current tasks. Every active project keeps at least one: '
+                 'add one from the task board.</div>')
 
-    with st.container(key="alef_note"):
-        note, act = st.columns([9, 1], vertical_alignment="center")
-        with note:
-            html(f"""
-            <div class="a-note">
-              <span class="a-note-icon">{icons.sparkle(14)}</span>
-              <div><div class="a-eyebrow">ALEF'S NOTE</div><p>{ALEF_NOTE}</p></div>
-            </div>
-            """)
-        with act:
-            with st.container(key="hdr_link_discuss"):
-                st.button("Discuss", key="discuss", on_click=navigate, args=("chat:vertical",))
+    if ws.note:
+        with st.container(key="alef_note"):
+            note, act = st.columns([9, 1.1], vertical_alignment="center")
+            with note:
+                html(f"""
+                <div class="a-note">
+                  <span class="a-note-icon">{icons.sparkle(14)}</span>
+                  <div><div class="a-eyebrow">ALEF'S NOTE</div><p>{esc(ws.note)}</p></div>
+                </div>
+                """)
+            with act:
+                action_button("Discuss", "discuss", tone="link", on_click=discuss_note)

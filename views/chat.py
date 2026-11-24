@@ -1,23 +1,12 @@
-"""Chat screens."""
-import streamlit as st
-
-from components.chat import message_html, render_composer
-from services.data_service import CHATS
-from utils.ui import html
+"""Chat screen."""
+from components.chat_view import render_composer, render_header, render_messages
+from utils.router import entity_id
+from utils.state import get_ws
 
 
-def render(chat_key: str) -> None:
-    chat = CHATS[chat_key]
-    messages = list(chat["messages"]) + st.session_state["chat_extra"].get(chat_key, [])
-    body = "".join(message_html(role, text) for role, text in messages)
-    html(f"""
-    <div class="a-chat-head">
-      <div><b>{chat['title']}</b><small>{chat['subtitle']}</small></div>
-      <span class="a-chat-more">···</span>
-    </div>
-    <div class="a-chat-body">
-      <div class="a-date"><span>TODAY</span></div>
-      {body}
-    </div>
-    """)
-    render_composer(chat_key)
+def render(page: str) -> None:
+    ws = get_ws()
+    chat = ws.get_chat(entity_id(page))
+    render_header(chat)
+    render_messages(chat, ws.project.user_name[:2].upper())
+    render_composer(ws, chat)

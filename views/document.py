@@ -1,29 +1,42 @@
-"""Document screens."""
+"""Document screen: rendered view + live editor."""
+import streamlit as st
+
+from components.entity_menu import entity_menu
 from components.page_header import page_header
-from services.data_service import DOCUMENTS
+from services.markdown_service import to_html
+from utils.actions import cancel_edit, save_document, start_edit
+from utils.router import entity_id
+from utils.state import get_ws
 from utils.ui import html
 
 
-def _blocks_html(blocks: list) -> str:
-    out = []
-    for kind, content in blocks:
-        if kind == "h1":
-            out.append(f"<h2>{content}</h2>")
-        elif kind == "quote":
-            out.append("<blockquote>" + "".join(f"<p>{l}</p>" for l in content) + "</blockquote>")
-        else:
-            out.append(f"<p class='a-doc-p'>{content}</p>")
-    return "".join(out)
+def render(page: str) -> None:
+    ws = get_ws()
+    doc = ws.get_document(entity_id(page))
+    editing = page in st.session_state["editing"]
 
+    page_header(
+        "DOCUMENT / LONG DESIGN DOC", doc.title, doc.subtitle,
+        primary=(dict(label="Save changes", key=f"save_{doc.id}", tone="solid",
+                      icon=":material/save:", on_click=save_document, args=(doc.id, page))
+                 if editing else
+                 dict(label="Edit long version", key=f"edit_{doc.id}", tone="outline",
+                      on_click=start_edit, args=(page,))),
+        menu=lambda: entity_menu("doc", doc.id, doc.title),
+    )
 
-def render(doc_key: str) -> None:
-    doc = DOCUMENTS[doc_key]
-    page_header(doc["eyebrow"].upper(), doc["title"], doc["subtitle"],
-                action="Edit long version", action_key="edit_doc")
-    gutter = "".join(f"<span>{i:02d}</span>" for i in range(1, doc["lines"] + 1))
+    if editing:
+        with st.container(key="doc_editor"):
+            st.text_area("Markdown", value=doc.markdown, height=470, key=f"doc_text_{doc.id}",
+                         label_visibility="collapsed")
+            st.button("Cancel", key=f"cancel_{doc.id}", on_click=cancel_edit, args=(page,))
+        return
+
+    lines = max(12, len(doc.markdown.splitlines()))
+    gutter = "".join(f"<span>{i:02d}</span>" for i in range(1, lines + 1))
     html(f"""
     <div class="a-doc">
       <div class="a-gutter">{gutter}</div>
-      <div class="a-doc-content">{_blocks_html(doc['blocks'])}</div>
+      <div class="a-doc-content">{to_html(doc.markdown)}</div>
     </div>
     """)

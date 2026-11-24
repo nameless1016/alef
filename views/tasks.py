@@ -1,12 +1,19 @@
 """Task board screen."""
+from components.dialogs import task_dialog
 from components.page_header import page_header
-from components.task_card import board_html
-from services.data_service import SPRINT
-from utils.ui import html
+from components.task_board import render_board
+from utils.state import get_ws
 
 
 def render() -> None:
-    page_header(f"{SPRINT['label'].upper()} / {SPRINT['days_left']} DAYS LEFT",
-                "Task board", "Every active project keeps at least one current task.",
-                action="New task", action_key="new_task", icon=":material/add:", tone="solid")
-    html(board_html())
+    ws = get_ws()
+    m = ws.milestone()
+    days = f" / {m['days_left']} DAYS LEFT" if m["days_left"] is not None else ""
+    if page_header(f"SPRINT 03{days}", "Task board",
+                   "Every active project keeps at least one current task.",
+                   primary=dict(label="New task", key="new_task", tone="solid", icon=":material/add:")):
+        task_dialog("")
+    render_board(ws)
+    if not ws.tasks_in("current"):
+        import streamlit as st
+        st.caption("Heads up: nothing is in Current. Move one task there to keep the project moving.")

@@ -1,40 +1,40 @@
-"""Mind-map screens."""
+"""Mind-map screen: live map + editable markdown panel."""
 import streamlit as st
 
+from components.entity_menu import entity_menu
 from components.mindmap import render_mindmap
 from components.page_header import page_header
-from services.data_service import MAPS
 from utils import icons
-from utils.state import markdown_visible, toggle_markdown
-from utils.ui import html
+from utils.actions import save_map_markdown, toggle_markdown
+from utils.router import entity_id
+from utils.state import get_ws
+from utils.ui import esc, html
 
 
-def _markdown_panel(filename: str, markdown: str) -> str:
-    lines = "".join(
-        f'<div><i>{n:02d}</i><span>{line}</span></div>'
-        for n, line in enumerate(markdown.splitlines(), start=1)
+def render(page: str) -> None:
+    ws = get_ws()
+    doc = ws.get_document(entity_id(page))
+    visible = page in st.session_state["md_open"]
+
+    page_header(
+        "MARKMAP / " + doc.title.upper(), doc.title, doc.subtitle,
+        primary=dict(label="Hide markdown" if visible else "View markdown",
+                     key=f"toggle_md_{doc.id}", tone="outline",
+                     on_click=toggle_markdown, args=(page,)),
+        menu=lambda: entity_menu("map", doc.id, doc.title),
     )
-    return f"""
-    <div class="a-md-panel">
-      <div class="a-md-file">{icons.file(13)}{filename}</div>
-      <div class="a-md-lines">{lines}</div>
-    </div>
-    """
 
-
-def render(map_key: str) -> None:
-    data = MAPS[map_key]
-    visible = markdown_visible(map_key)
-    page_header(data["eyebrow"].upper(), data["title"], data["subtitle"],
-                action="Hide markdown" if visible else "View markdown",
-                action_key=f"toggle_md_{map_key.replace(':', '_')}",
-                on_click=toggle_markdown, args=(map_key,))
     with st.container(key="markmap_split"):
         if visible:
             left, right = st.columns([1, 1.95], gap="small")
             with left:
-                html(_markdown_panel(data["filename"], data["markdown"]))
+                with st.container(key="md_editor"):
+                    html(f'<div class="a-md-file">{icons.file(13)}{esc(doc.filename)}</div>')
+                    st.text_area("Markdown", value=doc.markdown, height=530, key=f"map_md_{doc.id}",
+                                 on_change=save_map_markdown, args=(doc.id,),
+                                 label_visibility="collapsed",
+                                 help="Edits update the map when you click outside the box.")
             with right:
-                render_mindmap(data["markdown"])
+                render_mindmap(doc.markdown)
         else:
-            render_mindmap(data["markdown"])
+            render_mindmap(doc.markdown)

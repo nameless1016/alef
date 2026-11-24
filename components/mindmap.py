@@ -1,4 +1,5 @@
 """Interactive mind map rendered in an iframe (collapse on click + zoom)."""
+import html
 import json
 
 import streamlit.components.v1 as components
@@ -52,6 +53,11 @@ document.getElementById('out').onclick = () => { zoom = Math.max(40, zoom - 10);
 """
 
 
+_EMPTY = """<body style="margin:0;height:100vh;box-sizing:border-box;border:1px solid #26232a;background:#0f0e12;
+display:flex;align-items:center;justify-content:center;font:12px 'DM Sans',system-ui,sans-serif;color:#8c8892">
+Add a # heading in the markdown to start this map.</body>"""
+
+
 def _svg(nodes: list) -> str:
     edges, groups = [], []
     for n in nodes:
@@ -72,7 +78,7 @@ def _svg(nodes: list) -> str:
         groups.append(
             f'<g class="node" data-id="{n["id"]}" style="color:{c}">'
             f'<line class="ul" x1="{x1:.1f}" x2="{x2:.1f}" y1="{y:.1f}" y2="{y:.1f}" stroke="{c}"/>'
-            f'<text x="{tx:.1f}" y="{y - 5:.1f}">{n["label"]}</text>'
+            f'<text x="{tx:.1f}" y="{y - 5:.1f}">{html.escape(n["label"])}</text>'
             f'<circle cx="{x:.1f}" cy="{y:.1f}" r="{r}" stroke="{c}"/></g>'
         )
     return (f'<svg viewBox="0 0 {VIEW_W} {VIEW_H}" preserveAspectRatio="xMidYMid meet" '
@@ -81,6 +87,9 @@ def _svg(nodes: list) -> str:
 
 def render_mindmap(markdown: str, height: int = 562) -> None:
     nodes = layout(parse_markdown(markdown))
+    if not nodes:
+        components.html(_EMPTY, height=height)
+        return
     parents = {n["id"]: n["parent"] for n in nodes}
     page = (_TEMPLATE.replace("__SVG__", _svg(nodes))
                      .replace("__PARENTS__", json.dumps(parents)))
