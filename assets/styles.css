@@ -211,7 +211,7 @@ section[data-testid="stSidebar"] .stButton button > div{display:flex;gap:10px;al
 .a-msg-user{justify-content:flex-end}
 .a-msg-label{font:400 8.5px var(--mono);letter-spacing:.1em;color:var(--dim);margin-bottom:5px}
 .a-msg-user .a-msg-label{text-align:right}
-.a-bubble{width:560px;max-width:100%;padding:13px 14px;box-sizing:border-box;background:var(--s3);border:1px solid var(--line2);font:400 12.5px/1.55 var(--sans);color:#ece9ee}
+.a-bubble{width:560px;max-width:100%;padding:13px 14px;box-sizing:border-box;background:var(--s3);border:1px solid var(--line2);font:400 12.5px/1.55 var(--sans);color:#ece9ee;white-space:pre-wrap;word-break:break-word}
 .a-msg-user .a-bubble{width:560px;background:var(--s4)}
 .a-msg-user > div{flex:1;display:flex;flex-direction:column;align-items:flex-end}
 .a-msg-user .a-bubble{width:100%}

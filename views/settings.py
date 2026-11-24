@@ -57,6 +57,11 @@ def render() -> None:
             st.rerun()
 
         html('<div class="a-eyebrow a-section">DATA</div>')
+        if not ws.is_initialized():
+            from utils.actions import unlock_workspace
+            st.button("Unlock workspace manually", key="unlock_ws",
+                      on_click=unlock_workspace,
+                      help="Bypass Initial Mode tab locking if you want to edit files before chat setup.")
         with st.popover("Clear all data"):
             st.write("This removes every task, chat, document and change.")
             st.button("Yes, clear everything", on_click=reset_workspace, type="primary", key="clear_all")

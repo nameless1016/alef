@@ -12,14 +12,28 @@ LEVEL_DX = 164.5
 LEAF_DY = 38.6
 
 
+MAX_LEVEL = 4
+
+
 def parse_markdown(md: str):
-    """Return a nested dict tree built from '#' headings (first heading = root)."""
+    """Return a nested dict tree built from '#' headings and nested bullets (max 4 levels)."""
     root, stack, counter = None, [], 0
+    last_heading_level = 1
+    root_level = 1
     for line in md.splitlines():
-        m = re.match(r"^(#{1,6})\s+(.*\S)\s*$", line)
-        if not m:
+        hm = re.match(r"^(#{1,6})\s+(.*\S)\s*$", line)
+        bm = None if hm else re.match(r"^(\s*)[-*+]\s+(.*\S)\s*$", line)
+        if not hm and not bm:
             continue
-        level, label = len(m.group(1)), m.group(2)
+        if hm:
+            level = min(len(hm.group(1)), MAX_LEVEL)
+            label = hm.group(2)
+            last_heading_level = level
+        else:
+            indent = len(bm.group(1).expandtabs(2))
+            bullet_depth = indent // 2
+            level = min(last_heading_level + 1 + bullet_depth, MAX_LEVEL)
+            label = bm.group(2)
         node = {"id": f"n{counter}", "label": label, "children": []}
         counter += 1
         if root is None:
@@ -29,6 +43,9 @@ def parse_markdown(md: str):
             stack.pop()
         if not stack:
             stack = [(root_level, root)]   # another top-level heading: hang it off the root
+        # Cap visual tree depth at MAX_LEVEL - 1 (root is depth 0)
+        if len(stack) >= MAX_LEVEL:
+            stack = stack[: MAX_LEVEL - 1]
         stack[-1][1]["children"].append(node)
         stack.append((level, node))
     return root

@@ -1,0 +1,49 @@
+{
+  "schema": 2,
+  "project": {
+    "name": "Test",
+    "tagline": "",
+    "description": "",
+    "goal": "",
+    "engine": "Godot 4.3",
+    "user_name": "Mamdani",
+    "branch": "main",
+    "target": "",
+    "milestone_title": "",
+    "milestone_date": "",
+    "scope_load": 0,
+    "budget_used": 0,
+    "baseline": 0,
+    "accent": "Coral",
+    "include_docs": true,
+    "include_maps": true,
+    "status": "Project active",
+    "version": "Alef 0.8",
+    "format": "Markdown",
+    "initialized": false
+  },
+  "tasks": [],
+  "chats": [
+    {
+      "title": "Project setup",
+      "subtitle": "Setup \u00b7 Test",
+      "messages": [
+        {
+          "role": "user",
+          "text": "testing 1 say \"hello\" and nothing else",
+          "ts": 1795531885.2923746
+        },
+        {
+          "role": "alef",
+          "text": "hello",
+          "ts": 1795531888.164658
+        }
+      ],
+      "id": "9e126d"
+    }
+  ],
+  "documents": [],
+  "changes": [],
+  "note": "",
+  "last_sync": 1795531869.6549528
+}

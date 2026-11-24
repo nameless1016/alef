@@ -2,10 +2,11 @@
 import streamlit as st
 
 from components.dialogs import new_item_dialog, project_dialog
+from services.assistant import is_live_ai
 from services.formatting import initials
 from utils import icons
 from utils.actions import create_chat, cycle_accent, navigate, toggle_group
-from utils.state import get_lib, get_page, get_ws
+from utils.state import get_assistant_instance, get_lib, get_page, get_ws
 from utils.ui import esc, html
 
 GROUP_ICONS = {"chat": ":material/chat_bubble_outline:", "doc": ":material/description:",
@@ -16,13 +17,13 @@ def nav_key(page: str) -> str:
     return page.replace(":", "_")
 
 
-def _nav_button(page: str, label: str, icon: str) -> None:
+def _nav_button(page: str, label: str, icon: str, disabled: bool = False) -> None:
     st.button(label, key=f"nav_{nav_key(page)}", icon=icon,
               type="primary" if get_page() == page else "secondary",
-              on_click=navigate, args=(page,), use_container_width=True)
+              on_click=navigate, args=(page,), use_container_width=True, disabled=disabled)
 
 
-def _group_header(key: str, label: str, collapsed: bool) -> bool:
+def _group_header(key: str, label: str, collapsed: bool, disabled: bool = False) -> bool:
     """Collapsible header row with a working '+'. Returns True when '+' was pressed."""
     chev = icons.chevron_right(12) if collapsed else icons.chevron_down(12)
     with st.container(key=f"ghead_{key}"):
@@ -33,8 +34,8 @@ def _group_header(key: str, label: str, collapsed: bool) -> bool:
           <span class="a-group-label">{label}</span>
         </div>
         """)
-        st.button(f"Toggle {label}", key=f"gtoggle_{key}", on_click=toggle_group, args=(key,))
-        return st.button("New", key=f"add_{key}", icon=":material/add:")
+        st.button(f"Toggle {label}", key=f"gtoggle_{key}", on_click=toggle_group, args=(key,), disabled=disabled)
+        return st.button("New", key=f"add_{key}", icon=":material/add:", disabled=disabled)
 
 
 def _project_card() -> None:
@@ -57,6 +58,7 @@ def _project_card() -> None:
 def render_sidebar() -> None:
     ws = get_ws()
     p = ws.project
+    locked = is_live_ai(get_assistant_instance()) and not ws.is_initialized()
     collapsed = st.session_state["collapsed"]
     groups = [
         ("chat", "Chat", [(f"chat:{c.id}", c.title) for c in ws.chats]),
@@ -69,7 +71,8 @@ def render_sidebar() -> None:
 
         for key, label, items in groups:
             is_collapsed = key in collapsed
-            if _group_header(key, label, is_collapsed):
+            group_locked = locked and key in ("doc", "map")
+            if _group_header(key, label, is_collapsed, disabled=group_locked):
                 if key == "chat":
                     create_chat()
                     collapsed.discard("chat")
@@ -77,13 +80,15 @@ def render_sidebar() -> None:
                 else:
                     collapsed.discard(key)
                     new_item_dialog(key)
-            if not is_collapsed:
+            if not is_collapsed and not group_locked:
                 with st.container(key=f"group_{key}"):
                     for page, name in items:
                         _nav_button(page, name, GROUP_ICONS[key])
 
-        _nav_button("tasks", "Tasks", ":material/check:")
-        _nav_button("changes", "Changes", ":material/history:")
+        _nav_button("tasks", "Tasks", ":material/check:", disabled=locked)
+        _nav_button("changes", "Changes", ":material/history:", disabled=locked)
+        if locked:
+            st.caption("Complete project setup in Chat to unlock Documents, Map, Tasks & Changes.")
 
         with st.container(key="side_bottom"):
             if ws.tasks or p.scope_load:

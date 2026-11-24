@@ -19,7 +19,8 @@
     "include_maps": true,
     "status": "Project active",
     "version": "Alef 0.8",
-    "format": "Markdown"
+    "format": "Markdown",
+    "initialized": null
   },
   "tasks": [
     {
@@ -38,7 +39,18 @@
     {
       "title": "New chat 1",
       "subtitle": "Planning \u00b7 Glasshouse Protocol",
-      "messages": [],
+      "messages": [
+        {
+          "role": "user",
+          "text": "say hello to me",
+          "ts": 1795531849.0904543
+        },
+        {
+          "role": "alef",
+          "text": "Hello! I can help with production and technical advising for Glasshouse Protocol.",
+          "ts": 1795531856.294588
+        }
+      ],
       "id": "c5e0ca"
     }
   ],
@@ -48,6 +60,7 @@
       "kind": "map",
       "subtitle": "Explore the structure directly from its Markdown hierarchy.",
       "markdown": "# test\n## test\n# hello",
+      "role": null,
       "id": "a13099"
     }
   ],
@@ -57,7 +70,7 @@
       "title": "test updated",
       "text": "Content changed since the last context sync.",
       "ts": 1795506431.8131807,
-      "synced": false,
+      "synced": true,
       "id": "20c667"
     },
     {
@@ -65,10 +78,10 @@
       "title": "Tasks changed",
       "text": "Current priorities or completion state moved since the last context sync.",
       "ts": 1795505761.0724287,
-      "synced": false,
+      "synced": true,
       "id": "6fa3bc"
     }
   ],
   "note": "",
-  "last_sync": 1795505684.2285676
+  "last_sync": 1795531856.2939856
 }

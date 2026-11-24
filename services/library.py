@@ -2,7 +2,7 @@
 import time
 from typing import Callable, Dict, List, Optional, Tuple
 
-from .models import Project, new_id
+from .models import Chat, Project, new_id
 from .workspace import Workspace
 
 
@@ -47,9 +47,11 @@ class Library:
     def create(self, name: str, tagline: str = "", engine: str = "Godot 4.3",
                user_name: str = "there") -> str:
         pid = new_id()
-        ws = Workspace(Project(name=name.strip() or "Untitled project", tagline=tagline.strip(),
+        clean_name = name.strip() or "Untitled project"
+        ws = Workspace(Project(name=clean_name, tagline=tagline.strip(),
                                engine=engine, user_name=user_name, branch="main",
-                               scope_load=0, budget_used=0, baseline=0),
+                               scope_load=0, budget_used=0, baseline=0, initialized=False),
+                       chats=[Chat("Project setup", f"Setup · {clean_name}")],
                        last_sync=time.time())
         self.workspaces[pid] = ws
         self.order.append(pid)

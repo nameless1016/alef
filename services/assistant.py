@@ -1,23 +1,41 @@
 """Assistant interface. The AI plugs in here.
 
 `LocalAssistant` is a deterministic command router so every chat feature
-works today without a model. To add the real AI, implement `Assistant.reply`
-(call your model with `ws.context_snapshot()`, return text plus structured
-actions) and return it from `get_assistant()`. Nothing in the UI changes.
+works without a model key. `AlefAssistant` connects to the configured OpenAI-
+compatible LLM (`gpt-6-luna`), builds sandboxed `<project_state>` prompts,
+and parses the 4 allowed trailing XML tags into `Workspace.apply_action()` calls.
 """
+import logging
 import re
 from dataclasses import dataclass, field
-from typing import List, Protocol
+from typing import List, Optional, Protocol
 
+from .ai.llm_client import LLMClient, OpenAILLMClient, load_config
+from .ai.prompt_builder import (
+    build_chat_messages,
+    build_recontextualize_messages,
+    build_sync_messages,
+)
+from .ai.tag_parser import parse_response, to_actions
 from .formatting import parse_estimate
 from .models import COLUMN_LABELS
 from .workspace import PRIORITY_RANK, Workspace
+
+logger = logging.getLogger(__name__)
+
+_TRUNCATION_NOTICE = (
+    "Note: My reply hit the 500-token limit before finishing the structured update, "
+    "so no files were changed. Ask me to keep the update brief to retry."
+)
 
 
 @dataclass
 class AssistantReply:
     text: str
     actions: List[dict] = field(default_factory=list)   # executed via Workspace.apply_action
+    synced_changes: bool = False
+    warnings: List[str] = field(default_factory=list)
+    is_error: bool = False
 
 
 class Assistant(Protocol):
@@ -94,6 +112,89 @@ class LocalAssistant:
                 f"{len(ws.tasks_in('blocked'))} blocked.")
 
 
+class AlefAssistant:
+    """Live LLM-backed Game Dev Producer assistant."""
+
+    def __init__(self, client: LLMClient) -> None:
+        self.client = client
+
+    def _invoke(
+        self,
+        messages: List[dict],
+        *,
+        sync_on_success: bool,
+        allowed_action_types: Optional[set] = None,
+    ) -> AssistantReply:
+        try:
+            completion = self.client.complete(messages)
+        except Exception:
+            logger.exception("Alef LLM request failed")
+            return AssistantReply(
+                text=(
+                    "I couldn't reach the AI service right now. Your project state and any "
+                    "unsynced changes are intact—try again in a moment."
+                ),
+                actions=[],
+                synced_changes=False,
+                is_error=True,
+            )
+
+        parsed = parse_response(completion.content, completion.finish_reason)
+        actions = [] if parsed.truncated else to_actions(parsed)
+        if allowed_action_types is not None:
+            actions = [a for a in actions if a.get("type") in allowed_action_types]
+
+        reply_text = parsed.reply_text
+        if parsed.truncated:
+            reply_text = f"{reply_text}\n\n{_TRUNCATION_NOTICE}".strip() if reply_text else _TRUNCATION_NOTICE
+        elif not reply_text:
+            reply_text = "Updated project state." if actions else "I didn't receive a response. Try again."
+
+        return AssistantReply(
+            text=reply_text,
+            actions=actions,
+            synced_changes=sync_on_success,
+            warnings=list(parsed.warnings),
+            is_error=False,
+        )
+
+    def reply(self, ws: Workspace, chat_id: str, user_text: str) -> AssistantReply:
+        messages = build_chat_messages(ws, chat_id)
+        cleaned = (user_text or "").strip()
+        if cleaned:
+            last = messages[-1] if len(messages) > 1 else None
+            if not last or last.get("role") != "user" or last.get("content", "").strip() != cleaned:
+                messages.append({"role": "user", "content": cleaned})
+        return self._invoke(messages, sync_on_success=ws.unsynced_count() > 0)
+
+    def sync_changes(self, ws: Workspace, chat_id: Optional[str]) -> AssistantReply:
+        messages = build_sync_messages(ws, chat_id)
+        return self._invoke(messages, sync_on_success=True)
+
+    def recontextualize(self, ws: Workspace, doc_id: str, chat_id: Optional[str] = None) -> AssistantReply:
+        doc = ws.get_document(doc_id)
+        if not doc or not doc.markdown.strip():
+            return AssistantReply(
+                text="That document is empty—add content before recontextualizing.",
+                actions=[],
+                synced_changes=False,
+                is_error=True,
+            )
+        messages = build_recontextualize_messages(ws, doc_id)
+        return self._invoke(
+            messages,
+            sync_on_success=False,
+            allowed_action_types={"update_short_doc"},
+        )
+
+
+def is_live_ai(assistant: Assistant) -> bool:
+    return isinstance(assistant, AlefAssistant)
+
+
 def get_assistant() -> Assistant:
-    """Swap this for the real AI-backed assistant later."""
+    """Return live AlefAssistant when ALEF_API_KEY is configured, else LocalAssistant."""
+    config = load_config()
+    if config is not None:
+        return AlefAssistant(OpenAILLMClient(config))
     return LocalAssistant()

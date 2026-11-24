@@ -73,7 +73,7 @@ def demo_workspace() -> Workspace:
         goal="Prove the surveillance-loop vertical slice before expanding the second district.",
         user_name="Mamdani", branch="scope/vertical-slice", target=_iso(75),
         milestone_title="Evidence readability test", milestone_date=_iso(12),
-        scope_load=68, budget_used=68, baseline=13,
+        scope_load=68, budget_used=68, baseline=13, initialized=True,
     )
     tasks = [
         Task("Define the slice acceptance test", "current", "medium", "30m", None, ["from-chat"],
@@ -104,8 +104,8 @@ def demo_workspace() -> Workspace:
                             "slice; keep it blocked until the gate passes.")], id="scope"),
     ]
     docs = [
-        Document("Game Design Document", "doc", "Editable design source of truth for the full project.", GDD, id="gdd"),
-        Document("Project Brief", "doc", "Short summary of what the project is and what it is not.", BRIEF, id="brief"),
+        Document("Game Design Document", "doc", "Editable design source of truth for the full project.", GDD, role="long", id="gdd"),
+        Document("Project Brief", "doc", "Short summary of what the project is and what it is not.", BRIEF, role="short", id="brief"),
         Document("Project Overview", "map", "Explore the project structure directly from its Markdown hierarchy.", OVERVIEW, id="overview"),
         Document("Surveillance System", "map", "Cameras, suspicion, and the feedback players read.", SURVEILLANCE, id="surveillance"),
     ]
@@ -121,10 +121,11 @@ def demo_workspace() -> Workspace:
 
 
 def default_workspace() -> Workspace:
-    """A clean slate: only the project identity, no tasks, chats, files or changes."""
+    """A clean slate: project identity plus one starter setup chat, uninitialized."""
     project = Project(
         name="Glasshouse Protocol", tagline="Narrative stealth puzzle", engine="Godot 4.3",
         user_name="Mamdani", branch="scope/vertical-slice",
-        scope_load=0, budget_used=0, baseline=0,
+        scope_load=0, budget_used=0, baseline=0, initialized=False,
     )
-    return Workspace(project, last_sync=time.time())
+    setup_chat = Chat("Project setup", f"Setup · {project.name}")
+    return Workspace(project, chats=[setup_chat], last_sync=time.time())

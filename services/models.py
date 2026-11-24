@@ -48,6 +48,7 @@ class Project:
     status: str = "Project active"
     version: str = "Alef 0.8"
     format: str = "Markdown"
+    initialized: Optional[bool] = None
 
 
 @dataclass
@@ -88,6 +89,7 @@ class Document:
     kind: str = "doc"                # "doc" | "map"
     subtitle: str = ""
     markdown: str = ""
+    role: Optional[str] = None       # "short" | "long" | None
     id: str = field(default_factory=new_id)
 
     @property

@@ -20,7 +20,10 @@ def parse_estimate(text: str) -> Optional[float]:
 def fmt_due(iso: Optional[str]) -> str:
     if not iso:
         return "Unscheduled"
-    d = date.fromisoformat(iso)
+    try:
+        d = date.fromisoformat(iso)
+    except ValueError:
+        return "Unscheduled"
     return f"{d:%b} {d.day}"
 
 

@@ -26,11 +26,15 @@ def create_chat() -> None:
 
 def send_chat_input(chat_id: str) -> None:
     text = st.session_state.get(f"chat_input_{chat_id}", "")
-    chat_service.send_message(get_ws(), get_assistant_instance(), chat_id, text)
+    reply = chat_service.send_message(get_ws(), get_assistant_instance(), chat_id, text)
+    if reply and reply.warnings:
+        st.toast(reply.warnings[0])
 
 
 def send_chip(chat_id: str, text: str) -> None:
-    chat_service.send_message(get_ws(), get_assistant_instance(), chat_id, text)
+    reply = chat_service.send_message(get_ws(), get_assistant_instance(), chat_id, text)
+    if reply and reply.warnings:
+        st.toast(reply.warnings[0])
 
 
 def discuss_note() -> None:
@@ -86,11 +90,45 @@ def save_map_markdown(doc_id: str) -> None:
     get_ws().update_document(doc_id, markdown=st.session_state.get(f"map_md_{doc_id}", ""))
 
 
-# ---- changes / theme
+# ---- changes / AI actions / theme
 def update_alef() -> None:
-    snap = get_ws().sync_context()
-    st.toast(f"Alef context updated: {len(snap['tasks'])} tasks, "
-             f"{len(snap['documents']) + len(snap['maps'])} files")
+    from services.assistant import is_live_ai
+
+    ws = get_ws()
+    assistant = get_assistant_instance()
+    chat_id, reply = chat_service.sync_with_alef(ws, assistant)
+    if reply.is_error:
+        st.toast(reply.text)
+        return
+    if is_live_ai(assistant) and chat_id:
+        st.toast("Alef reviewed your changes")
+        navigate(f"chat:{chat_id}")
+    else:
+        snap = ws.context_snapshot()
+        st.toast(f"Alef context updated: {len(snap['tasks'])} tasks, "
+                 f"{len(snap['documents']) + len(snap['maps'])} files")
+
+
+def recontextualize_document(doc_id: str) -> None:
+    ws = get_ws()
+    reply = chat_service.recontextualize_doc(ws, get_assistant_instance(), doc_id)
+    if reply.is_error or not reply.actions:
+        st.toast(reply.text)
+        return
+    if reply.warnings:
+        st.toast(reply.warnings[0])
+    else:
+        st.toast("Short Document updated from Long Document")
+    short = ws.short_doc()
+    if short:
+        navigate(short.page)
+
+
+def unlock_workspace() -> None:
+    ws = get_ws()
+    ws.project.initialized = True
+    ws._touch()
+    st.toast("Workspace unlocked")
 
 
 def cycle_accent() -> None:
