@@ -411,3 +411,49 @@ section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"]{padding-bo
 /* map editor: fixed size, hint wraps instead of being clipped */
 [class*="st-key-map_md_"] textarea{resize:none !important}
 .a-md-hint{white-space:normal;line-height:1.5}
+
+/* =====================================================================
+   v5: task chevrons, resizable sidebar, header actions
+   ===================================================================== */
+
+/* task cards: one chevron, pinned to the card's vertical centre (the invisible overlay button only catches clicks) */
+.a-task{position:relative}
+.a-task-chev{position:absolute;right:10px;top:50%;transform:translateY(-50%);display:flex;align-items:center;
+  justify-content:center;width:16px;height:16px;color:var(--dim);transition:color .12s,transform .12s}
+[class*="st-key-card_task_"]:hover .a-task-chev{color:var(--coral);transform:translate(2px,-50%)}
+[class*="st-key-ovl_task_"] .stButton button [data-testid="stIconMaterial"]{display:none}
+
+/* page header: title fills the row, actions ("···" + primary) sit flush right, side by side */
+.st-key-page_head [data-testid="stHorizontalBlock"]{display:flex;flex-wrap:nowrap !important;gap:8px !important;align-items:flex-start}
+.st-key-page_head [data-testid="stColumn"]{flex:0 0 auto !important;width:auto !important;min-width:0 !important}
+.st-key-page_head [data-testid="stColumn"]:first-child{flex:1 1 0 !important}
+.st-key-page_head [data-testid="stColumn"]:not(:first-child){padding-top:2px}
+.st-key-page_head [data-testid="stColumn"]:not(:first-child) [data-testid="stElementContainer"]{margin-left:0}
+
+/* sidebar: width comes from --side-w (set by assets/sidebar.js), so it can be dragged or hidden */
+section[data-testid="stSidebar"]{transition:width .18s ease,min-width .18s ease,max-width .18s ease}
+.alef-side-dragging section[data-testid="stSidebar"]{transition:none}
+.alef-side-dragging,.alef-side-dragging *{cursor:col-resize !important;user-select:none !important}
+[data-testid="stSidebarResizeHandle"],[data-testid="stSidebarResizer"]{display:none !important}
+html[data-alef-side="hidden"] section[data-testid="stSidebar"]{visibility:hidden;border-right:0;overflow:hidden}
+.st-key-composer{transition:left .18s ease}
+.alef-side-dragging .st-key-composer{transition:none}
+
+#alef-side-handle{position:fixed;top:var(--top-h);bottom:var(--status-h);left:var(--side-w);width:0;z-index:1000000;
+  transition:left .18s ease}
+.alef-side-dragging #alef-side-handle{transition:none}
+.alef-side-line{position:absolute;top:0;bottom:0;left:-4px;width:9px;cursor:col-resize;touch-action:none}
+.alef-side-line::after{content:"";position:absolute;top:0;bottom:0;left:4px;width:1px;background:transparent;transition:background .12s,width .12s}
+#alef-side-handle:hover .alef-side-line::after,.alef-side-dragging .alef-side-line::after{background:var(--coral);width:2px;left:3px}
+.alef-side-tab{position:absolute;top:50%;left:0;transform:translateY(-50%);width:15px;height:52px;padding:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  background:var(--s3);border:1px solid var(--line2);border-left:0;border-radius:0 4px 4px 0;
+  cursor:grab;touch-action:none;transition:background .12s,border-color .12s}
+.alef-side-tab:active{cursor:grabbing}
+.alef-side-tab i{display:block;width:3px;height:3px;border-radius:50%;background:var(--dim);transition:background .12s}
+.alef-side-tab:hover,.alef-side-dragging .alef-side-tab{background:var(--s4);border-color:var(--coral)}
+.alef-side-tab:hover i,.alef-side-dragging .alef-side-tab i{background:var(--coral)}
+html[data-alef-side="hidden"] .alef-side-tab{width:18px}
+
+/* zero-height helper iframes (script loaders) take no space */
+[data-testid="stElementContainer"]:has(> iframe[height="1"]),[data-testid="stElementContainer"]:has(iframe[height="1"]){height:0 !important;min-height:0 !important;overflow:hidden;margin:0 !important}

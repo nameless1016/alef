@@ -19,6 +19,7 @@ def _card_html(task: Task) -> str:
     <div class="a-task{cls}">
       <span class="a-task-main"><b>{esc(task.title)}</b>
       <small>{esc(task.estimate)} · {esc(fmt_due(task.due))}</small></span>
+      <span class="a-task-chev">{icons.chevron_right(13)}</span>
     </div>
     """
 
@@ -29,8 +30,7 @@ def task_card(task: Task) -> None:
         st.button("Toggle complete", key=f"tskchk_{'done_' if task.done else ''}{task.id}",
                   icon=":material/check_box:" if task.done else ":material/check_box_outline_blank:",
                   on_click=toggle_task, args=(task.id,))
-        if st.button(f"Open {task.title}", key=f"ovl_task_{task.id}",
-                     icon=":material/chevron_right:"):
+        if st.button(f"Open {task.title}", key=f"ovl_task_{task.id}"):
             task_dialog(task.id)
 
 

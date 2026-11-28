@@ -2,9 +2,8 @@
 import html
 import json
 
-import streamlit.components.v1 as components
-
 from services.markmap_service import VIEW_H, VIEW_W, layout, parse_markdown
+from utils.ui import embed_html
 
 _TEMPLATE = """
 <style>
@@ -141,10 +140,10 @@ def _svg(nodes: list) -> str:
 def render_mindmap(markdown: str, height: int = 562) -> None:
     nodes = layout(parse_markdown(markdown))
     if not nodes:
-        components.html(_EMPTY, height=height)
+        embed_html(_EMPTY, height=height)
         return
     parents = {n["id"]: n["parent"] for n in nodes}
     page = (_TEMPLATE.replace("__SVG__", _svg(nodes))
                      .replace("__PARENTS__", json.dumps(parents))
                      .replace("__VW__", str(VIEW_W)).replace("__VH__", str(VIEW_H)))
-    components.html(page, height=height, scrolling=False)
+    embed_html(page, height=height)

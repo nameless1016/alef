@@ -4,6 +4,7 @@ from PIL import Image
 
 from components.chrome import render_statusbar, render_topbar
 from components.sidebar import render_sidebar
+from components.ui_scripts import inject_scripts
 from utils.router import resolve
 from utils.state import get_page, get_ws, init_state
 from utils.ui import LOGO_PATH, inject_css
@@ -28,6 +29,7 @@ inject_css(
 render_topbar()
 render_sidebar()
 render_statusbar()
+inject_scripts()
 
 kind = page.partition(":")[0]
 if page == "today":

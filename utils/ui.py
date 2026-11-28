@@ -41,3 +41,13 @@ def inject_css(content_width: int, badges: dict, accent: str = "Coral",
         dynamic.append(f'.st-key-nav_{key} button::after{{content:"{shown}";'
                        f'{"display:none;" if not count else ""}}}')
     st.markdown(f"<style>{css}\n{icons.css()}\n{' '.join(dynamic)}</style>", unsafe_allow_html=True)
+
+
+def embed_html(markup: str, height: int = 0, scrolling: bool = False) -> None:
+    """Render an HTML/JS snippet in a same-origin iframe (st.iframe on new Streamlit,
+    components.html on older versions)."""
+    if hasattr(st, "iframe"):
+        st.iframe(markup, height=height if height else 1)
+    else:
+        import streamlit.components.v1 as components
+        components.html(markup, height=height, scrolling=scrolling)
